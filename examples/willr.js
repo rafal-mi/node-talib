@@ -6,7 +6,7 @@ console.log();
 console.log("TALib Version: " + talib.version);
 
 // Load market data
-var marketContents = fs.readFileSync('examples/marketdata.json','utf8');
+var marketContents = fs.readFileSync('examples/marketdata.json', 'utf8');
 var marketData = JSON.parse(marketContents);
 
 /*
@@ -23,25 +23,41 @@ var marketData = JSON.parse(marketContents);
 
 // execute SMA indicator function with time period 180
 
-let endIdx = marketData.close.length - 1;
-let startIdx = endIdx - 100; 
 
-talib.execute({
-    name: "WILLR",
-    startIdx: startIdx,
-    endIdx: endIdx,
-    high: marketData.high,
-    low: marketData.low,
-    close: marketData.close,
-    optInTimePeriod: startIdx
-}, function (err, result) {
+const dataLength = 7 * 8;
+const count = 4;
+const beginAt = 100;
+let results = [];
 
-    if(err) {
-        console.log(err);
-    }
+for (let n = 0; n < count; n++) {
 
-    // Show the result array
-    console.log("WILLR Function Results:");
-    console.log(result);
+    const sliceArray = a => a.slice(beginAt - dataLength + n, beginAt + n);
 
-});
+    let high = sliceArray(marketData.high);
+    let low = sliceArray(marketData.low);
+    let close = sliceArray(marketData.close);
+
+    let startIdx = dataLength - 1;
+    
+    talib.execute({
+        name: "WILLR",
+        startIdx: startIdx,
+        endIdx: startIdx,
+        high: high,
+        low: low,
+        close: close,
+        optInTimePeriod: startIdx
+    }, function (err, result) {
+
+        if (err) {
+            console.log(err);
+        }
+
+        results[n] = result;
+        console.log(JSON.stringify(results));
+        
+
+    });
+
+};
+
